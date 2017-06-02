@@ -57,4 +57,6 @@ dependencies {
     compile 'com.jakewharton.rxbinding2:rxbinding:2.0.0'
 
     testCompile 'junit:junit:4.12'
+    testCompile 'com.github.stephanenicolas.toothpick:toothpick-testing:1.0.6'
+    testCompile 'org.easymock:easymock:3.4'
 }

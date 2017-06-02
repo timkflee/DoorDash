@@ -1,9 +1,10 @@
 package com.tim.doordashlite.manager;
 
+import com.tim.doordashlite.network.RequestUtil;
+import com.tim.doordashlite.network.RestaurantsRequestProperties;
 import com.tim.doordashlite.model.Restaurant;
 import com.tim.doordashlite.network.DoorDashService;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,12 +22,10 @@ import io.reactivex.schedulers.Schedulers;
 public class RestaurantManager {
 
     @Inject DoorDashService doorDashService;
+    @Inject RequestUtil requestUtil;
 
-    public Flowable<List<Restaurant>> getRestaurantsObservable() {
-        Map<String, String> queries = new HashMap<>();
-        queries.put("lat", "37.422740");
-        queries.put("lng", "-122.139956");
-
+    public Flowable<List<Restaurant>> getRestaurantsObservable(RestaurantsRequestProperties properties) {
+        Map<String, String> queries = requestUtil.createRestaurantsQueryMap(properties);
         return doorDashService.getRestaurants(queries)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread());

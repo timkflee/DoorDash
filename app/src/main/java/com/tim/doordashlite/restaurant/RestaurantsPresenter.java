@@ -2,6 +2,7 @@ package com.tim.doordashlite.restaurant;
 
 import android.app.Application;
 
+import com.tim.doordashlite.network.RestaurantsRequestProperties;
 import com.tim.doordashlite.manager.RestaurantManager;
 import com.tim.doordashlite.model.Restaurant;
 
@@ -20,6 +21,9 @@ import toothpick.Toothpick;
 
 public class RestaurantsPresenter {
 
+    private static final double DOORDASH_LAT = 37.422740;
+    private static final double DOORDASH_LNG = -122.139956;
+
     @Inject RestaurantManager restaurantManager;
 
     private RestaurantsView view;
@@ -32,7 +36,12 @@ public class RestaurantsPresenter {
 
     public void loadRestaurants() {
         view.enableSpinner(true);
-        final Disposable disposable = restaurantManager.getRestaurantsObservable()
+        final RestaurantsRequestProperties properties = new RestaurantsRequestProperties.Builder()
+                .latitude(DOORDASH_LAT)
+                .longitude(DOORDASH_LNG)
+                .build();
+
+        final Disposable disposable = restaurantManager.getRestaurantsObservable(properties)
                 .subscribeWith(new DisposableSubscriber<List<Restaurant>>() {
                     @Override
                     public void onNext(List<Restaurant> restaurants) {

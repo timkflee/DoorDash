@@ -117,7 +117,7 @@ public class MainActivity extends BaseActivity {
                 .commit();
 
         menuItem.setChecked(true);
-        setTitle(menuItem.getTitle());
+        getSupportActionBar().setTitle(menuItem.getTitle());
         drawerLayout.closeDrawers();
     }
 }

@@ -19,7 +19,7 @@ import toothpick.Toothpick;
  * Created by Home on 5/31/17.
  */
 
-public class RestaurantsPresenter {
+public class RestaurantsPresenter implements OnRestaurantClickListener {
 
     private static final double DOORDASH_LAT = 37.422740;
     private static final double DOORDASH_LNG = -122.139956;
@@ -61,6 +61,7 @@ public class RestaurantsPresenter {
         compositeDisposable.add(disposable);
     }
 
+    @Override
     public void onRestaurantClick(Restaurant restaurant) {
         view.goToDetails(restaurant.id, restaurant.name);
     }

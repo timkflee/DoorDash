@@ -19,6 +19,8 @@ import com.tim.doordashlite.manager.FavoriteManager;
 import com.tim.doordashlite.manager.RestaurantManager;
 import com.tim.doordashlite.model.Restaurant;
 
+import java.util.Observable;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -74,6 +76,23 @@ public class DetailActivity extends BaseActivity {
         }
 
         setupToolbar();
+
+        final Disposable disposable = Flowable.fromCallable(new Callable<Boolean>() {
+                                            @Override
+                                            public Boolean call() throws Exception {
+                                                return favoriteManager.favoriteExists(restaurantId);
+                                            }
+                                        }).subscribe(new Consumer<Boolean>() {
+                                            @Override
+                                            public void accept(@NonNull Boolean aBoolean) throws Exception {
+                                                if (aBoolean) {
+                                                    addButton.setText(R.string.remove_favorite);
+                                                } else {
+                                                    addButton.setText(R.string.add_favorite);
+                                                }
+                                            }
+                                        });
+        compositeDisposable.add(disposable);
     }
 
     @Override
@@ -132,7 +151,12 @@ public class DetailActivity extends BaseActivity {
                                         .subscribe(new Consumer<Object>() {
                                             @Override
                                             public void accept(@NonNull Object o) throws Exception {
-                                                addRestaurant(restaurant);
+                                                if (favoriteManager.favoriteExists(restaurantId)) {
+                                                    removeRestaurant(restaurant);
+                                                } else {
+                                                    addRestaurant(restaurant);
+                                                }
+
                                             }
                                         });
         compositeDisposable.add(disposable);
@@ -156,6 +180,7 @@ public class DetailActivity extends BaseActivity {
                 .subscribeWith(new DisposableCompletableObserver() {
                     @Override
                     public void onComplete() {
+                        addButton.setText(R.string.remove_favorite);
                         final Toast toast = Toast.makeText(getApplicationContext(), R.string.favorite_added, Toast.LENGTH_LONG);
                         toast.show();
                     }
@@ -163,6 +188,38 @@ public class DetailActivity extends BaseActivity {
                     @Override
                     public void onError(@NonNull Throwable e) {
                         final Toast toast = Toast.makeText(getApplicationContext(), R.string.favorite_added_error, Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+                });
+        compositeDisposable.add(disposable);
+    }
+
+    private void removeRestaurant(Restaurant restaurant) {
+        final Disposable disposable = Flowable.just(restaurant)
+                .flatMapCompletable(new Function<Restaurant, CompletableSource>() {
+                    @Override
+                    public CompletableSource apply(@NonNull Restaurant restaurant) throws Exception {
+                        final boolean added = favoriteManager.removeRestaurant(restaurant);
+                        if (added) {
+                            return Completable.complete();
+                        }
+
+                        return Completable.error(new Throwable());
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeWith(new DisposableCompletableObserver() {
+                    @Override
+                    public void onComplete() {
+                        addButton.setText(R.string.add_favorite);
+                        final Toast toast = Toast.makeText(getApplicationContext(), R.string.favorite_removed, Toast.LENGTH_LONG);
+                        toast.show();
+                    }
+
+                    @Override
+                    public void onError(@NonNull Throwable e) {
+                        final Toast toast = Toast.makeText(getApplicationContext(), R.string.favorite_removed_error, Toast.LENGTH_LONG);
                         toast.show();
                     }
                 });

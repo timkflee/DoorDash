@@ -38,4 +38,23 @@ public class FavoriteManager {
         }
         return false;
     }
+
+    public boolean removeRestaurant(Restaurant restaurant) {
+        try {
+            final int numOfDeleted = favoriteDao.deleteById(restaurant.id);
+            return numOfDeleted == 1;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean favoriteExists(int id) {
+        try {
+            return favoriteDao.idExists(id);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

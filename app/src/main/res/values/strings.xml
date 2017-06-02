@@ -7,6 +7,8 @@
     <string name="add_favorite">Add to Favorites</string>
     <string name="remove_favorite">Remove from Favorites</string>
     <string name="favorite_added">Added to Favorites</string>
+    <string name="favorite_removed">Removed from Favorites</string>
     <string name="favorite_added_error">Failed to Add</string>
+    <string name="favorite_removed_error">Failed to Remove</string>
     <string name="doordash">DoorDash</string>
 </resources>

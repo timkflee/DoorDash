@@ -8,13 +8,13 @@ import com.tim.doordashlite.model.Restaurant;
 
 public class RestaurantClickCallback {
 
-    private RestaurantsPresenter presenter;
+    private OnRestaurantClickListener onRestaurantClickListener;
 
-    public RestaurantClickCallback(RestaurantsPresenter presenter) {
-        this.presenter = presenter;
+    public RestaurantClickCallback(OnRestaurantClickListener onRestaurantClickListener) {
+        this.onRestaurantClickListener = onRestaurantClickListener;
     }
 
     public void onRestaurantClick(Restaurant restaurant) {
-        presenter.onRestaurantClick(restaurant);
+        onRestaurantClickListener.onRestaurantClick(restaurant);
     }
 }

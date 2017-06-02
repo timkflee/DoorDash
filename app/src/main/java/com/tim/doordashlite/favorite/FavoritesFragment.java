@@ -1,5 +1,7 @@
 package com.tim.doordashlite.favorite;
 
+import android.app.Application;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -14,8 +16,11 @@ import android.view.ViewGroup;
 
 import com.tim.doordashlite.BaseFragment;
 import com.tim.doordashlite.R;
+import com.tim.doordashlite.detail.DetailActivity;
 import com.tim.doordashlite.manager.FavoriteManager;
 import com.tim.doordashlite.model.Restaurant;
+import com.tim.doordashlite.restaurant.RestaurantClickCallback;
+import com.tim.doordashlite.restaurant.RestaurantsPresenter;
 import com.tim.doordashlite.restaurant.adapter.RestaurantAdapter;
 
 import java.util.List;
@@ -24,17 +29,21 @@ import javax.inject.Inject;
 
 import butterknife.BindView;
 
+import static com.tim.doordashlite.detail.DetailActivity.RESTAURANT_ID;
+import static com.tim.doordashlite.detail.DetailActivity.RESTAURANT_NAME;
+
 /**
  * Created by Home on 6/1/17.
  */
 
-public class FavoritesFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<List<Restaurant>>{
+public class FavoritesFragment extends BaseFragment implements FavoriteView {
 
     @BindView(R.id.swipe_refresh) SwipeRefreshLayout swipeRefreshLayout;
     @BindView(R.id.list) RecyclerView recyclerView;
 
-    @Inject FavoriteManager favoriteManager;
+    @Inject Application application;
 
+    private FavoritePresenter presenter;
     private RestaurantAdapter restaurantAdapter;
 
     public static FavoritesFragment newInstance() {
@@ -45,15 +54,15 @@ public class FavoritesFragment extends BaseFragment implements LoaderManager.Loa
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        presenter = new FavoritePresenter(application, this, getLoaderManager());
         restaurantAdapter = new RestaurantAdapter();
-        getLoaderManager().initLoader(0, null, this);
+        restaurantAdapter.registerCallback(new RestaurantClickCallback(presenter));
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_restaurant_list, container, false);
-        return view;
+        return inflater.inflate(R.layout.fragment_restaurant_list, container, false);
     }
 
     @Override
@@ -66,17 +75,29 @@ public class FavoritesFragment extends BaseFragment implements LoaderManager.Loa
     }
 
     @Override
-    public Loader onCreateLoader(int id, Bundle args) {
-        return new FavoriteLoader(getContext(), favoriteManager);
+    public void onStart() {
+        super.onStart();
+        presenter.loadFavorites();
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Restaurant>> loader, List<Restaurant> data) {
-        restaurantAdapter.setData(data);
+    public void setData(List<Restaurant> restaurants) {
+        restaurantAdapter.setData(restaurants);
     }
 
     @Override
-    public void onLoaderReset(Loader loader) {
+    public void enableSpinner(boolean enable) {
+        swipeRefreshLayout.setRefreshing(enable);
+    }
 
+    @Override
+    public void goToDetails(int restaurantId, String restaurantName) {
+        final Bundle extra = new Bundle();
+        extra.putInt(RESTAURANT_ID, restaurantId);
+        extra.putString(RESTAURANT_NAME, restaurantName);
+        final Intent intent = new Intent(getActivity(), DetailActivity.class);
+        intent.putExtras(extra);
+
+        startActivity(intent);
     }
 }
